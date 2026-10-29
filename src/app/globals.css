@@ -1,0 +1,759 @@
+@import "tailwindcss";
+
+/*
+ * DESIGN SYSTEM
+ * The color palette is derived from two main colors:
+ *   navy #19214F → brand-800,   red #C72635 → accent-600.
+ * The other steps are lighter/darker variants keeping the hue of these two colors; every pairing used for text
+ * has a contrast ratio of at least 4.5:1. If a main color changes, the steps must be derived again together.
+ * The interface stays plain: no gradients, stacked shadows, pill-shaped buttons or decorative animation.
+ */
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --color-brand-50: #f3f4fa;
+  --color-brand-100: #e4e6f2;
+  --color-brand-200: #c5c9e2;
+  --color-brand-300: #99a1ca;
+  --color-brand-500: #455092;
+  --color-brand-600: #2d397d;
+  --color-brand-700: #222c65;
+  --color-brand-800: #19214f;
+  --color-brand-900: #12183a;
+
+  --color-accent-50: #fdf3f4;
+  --color-accent-100: #fbe3e5;
+  --color-accent-600: #c72635;
+  --color-accent-700: #a81d2a;
+
+  --color-ink: #1c2233;
+  --color-muted: #5b6477;
+  --color-line: #d9dde6;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f7f9;
+
+  --radius-control: 0.375rem;
+
+  /*
+   * Customer panel home page (/panel). Taken one-to-one from the design.
+   * The same visual language is used on two other
+   * screens: the notifications page and the application wizard steps. It does not spread to other screens.
+   */
+  --color-dash-canvas: #f6f5f1;
+  --color-dash-navy: #19214f;
+  --color-dash-navy-hover: #2a3470;
+  --color-dash-navy-tint: #e8e9f2;
+  --color-dash-red: #c72635;
+  --color-dash-red-hover: #a91f2d;
+  --color-dash-red-tint: #fbf1f2;
+  --color-dash-pink: #f5a3ab;
+  --color-dash-green: #7a8a5e;
+  --color-dash-green-ink: #56633f;
+  --color-dash-green-tint: #e1eecc;
+  --color-dash-green-soft: #b9c79f;
+  --color-dash-draft-bg: #fdf3d3;
+  --color-dash-draft-ink: #7a5b00;
+  --color-dash-subtle: #f3f3f6;
+  --color-dash-line: #e6e6ec;
+  --color-dash-line-strong: #dddee5;
+  --color-dash-line-soft: #ececf0;
+  --color-dash-ink: #19214f;
+  --color-dash-ink-2: #585e80;
+  --color-dash-ink-3: #7c8099;
+  --color-dash-ink-4: #a2a5b7;
+  --color-dash-on-navy: #c9cce0;
+  /* Notifications page */
+  --color-dash-unread: #f8f8fb;
+  --color-dash-yellow: #e0b021;
+  --color-dash-dot: #c2c4d0;
+  --color-dash-red-border: #f2cdd1;
+  /* On hover: one shade darker than an unread (red background) row; derived from the two main colors. */
+  --color-dash-red-tint-hover: #f6e1e4;
+  /* The "medium" and "weak" ranges of the risk test result: colors from the risk test design. */
+  --color-dash-risk-medium: #d98a00;
+  --color-dash-risk-low: #b23b3b;
+  /* Application wizard: field border, checkbox frame,
+     selected card background, "completed" pill text, warning note text, hovered background of the receipt field. */
+  --color-dash-field: #e1e2e8;
+  --color-dash-check: #c9cbd6;
+  --color-dash-selected: #f7f7fa;
+  --color-dash-green-deep: #3d472b;
+  --color-dash-warn-ink: #5c4500;
+  --color-dash-drop-hover: #fafaf8;
+  /* Customer status card: appointment strip and its divider. */
+  --color-dash-navy-strip: #232c64;
+  --color-dash-navy-divider: #33407a;
+  /* Admin panel: hovered table row background, side panel divider,
+     table row line, accent/border/list background/inner line/button border of the "with customer" yellow, "Clear" background. */
+  --color-dash-row-hover: #fafaf7;
+  --color-dash-side-line: #e2e1da;
+  --color-dash-line-faint: #f0f0f3;
+  --color-dash-yellow-accent: #f2c230;
+  --color-dash-yellow-border: #f2e2a8;
+  --color-dash-yellow-row: #fffbef;
+  --color-dash-yellow-line: #f5ebc6;
+  --color-dash-yellow-button: #e6d49a;
+  --color-dash-clear-hover: #edece6;
+}
+
+/*
+ * Figtree font. `inline` is required: the font variable is not defined on <html>, only on the own element of the
+ * screens that use it (src/lib/fonts/figtree.ts).
+ */
+@theme inline {
+  --font-dash: var(--font-figtree), system-ui, sans-serif;
+}
+
+/* Customer panel home page: pulse on the current step's ring (stops when reduced motion is preferred). */
+@keyframes dash-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+/* Notification deletion: the "Undo" toast slides in and out from the bottom.
+   Horizontal centering uses the `translate` property; only `transform` changes here. */
+@keyframes dash-toast-in {
+  from {
+    transform: translateY(calc(100% + 28px));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes dash-toast-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(calc(100% + 28px));
+    opacity: 0;
+  }
+}
+
+/* Customer panel home page: the red focus ring from the design. */
+.dash-root :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-dash-red);
+  outline-offset: 2px;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 0;
+}
+
+/* Pointer cursor on every clickable element. */
+:where(button, [role="button"], summary, label[for], select, input[type="checkbox"], input[type="radio"], input[type="file"]):not(:disabled) {
+  cursor: pointer;
+}
+:where(button, select, input):disabled {
+  cursor: not-allowed;
+}
+
+/* A clearly visible focus ring on every interactive element during keyboard navigation. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+
+/* Respect the reduced motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .field-control {
+    @apply block w-full rounded-[var(--radius-control)] border border-line bg-white px-3 py-2 text-[0.9375rem] leading-6 text-ink placeholder:text-slate-400;
+    @apply hover:border-brand-300 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500;
+  }
+  .field-control[aria-invalid="true"] {
+    @apply border-accent-600;
+  }
+  .prose-plain p + p {
+    @apply mt-3;
+  }
+
+  /*
+   * APPLICATION WIZARD. Applies only inside the frame of the
+   * application steps (`.wiz-root`, src/components/customer/wizard/); fields on other screens are unchanged.
+   * Fields: 50px height, 14px radius, 1.5px border; an invalid field gets a red border.
+   */
+  .wiz-root .field-control {
+    min-height: 50px;
+    border-radius: 14px;
+    border: 1.5px solid var(--color-dash-field);
+    background-color: var(--color-white);
+    padding: 12px 16px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-dash-ink);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .wiz-root :is(input, button).field-control {
+    height: 50px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .wiz-root .field-control::placeholder {
+    color: var(--color-dash-ink-4);
+  }
+  .wiz-root .field-control:hover {
+    border-color: var(--color-dash-check);
+  }
+  .wiz-root .field-control[aria-invalid="true"] {
+    border-color: var(--color-dash-red);
+  }
+  .wiz-root .field-control:disabled {
+    background-color: var(--color-dash-subtle);
+    color: var(--color-dash-ink-3);
+  }
+  .wiz-root input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.45;
+  }
+
+  /* The rounded checkbox from the design (22px, navy background + white tick when checked). */
+  .wiz-check {
+    appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    border-radius: 7px;
+    border: 1.5px solid var(--color-dash-check);
+    background-color: var(--color-white);
+    transition:
+      background-color 0.15s,
+      border-color 0.15s;
+  }
+  .wiz-check:checked {
+    border-color: var(--color-dash-navy);
+    background: var(--color-dash-navy)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+      center / 13px no-repeat;
+  }
+  .wiz-check:disabled {
+    opacity: 0.5;
+  }
+
+  /* Round radio button used for Yes/No choices. */
+  .wiz-radio {
+    appearance: none;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-dash-check);
+    background-color: var(--color-white);
+    transition: border 0.15s;
+  }
+  .wiz-radio:checked {
+    border: 6px solid var(--color-dash-navy);
+  }
+
+  /* In high contrast mode the browser's own controls are used (custom drawing may not be visible). */
+  @media (forced-colors: active) {
+    .wiz-check,
+    .wiz-radio {
+      appearance: auto;
+    }
+  }
+}
+
+/*
+ * Application steps: a focused field gets a navy border and a soft ring (the focus style from the design). Written
+ * outside layers so the panel's red focus ring (.dash-root) does not replace it on fields. The select arrow is also
+ * on the right at its own size, as in the design.
+ */
+.wiz-root .field-control:focus {
+  outline: none;
+  border-color: var(--color-dash-navy);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-dash-navy) 8%, transparent);
+}
+.wiz-root select.field-control {
+  appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c8099' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+}
+/* A select with nothing chosen yet ("Seçiniz") looks faded, as in the design. */
+.wiz-root select.field-control:has(option[value=""]:checked) {
+  color: var(--color-dash-ink-3);
+}
+
+/*
+ * ADMIN PANEL
+ * Inside `.admin-root` the older shared components (button, card, badge, form field) take on the design's language:
+ * color and radius tokens are redefined in this scope. The list, the application header and the General tab are
+ * written separately to match the design one-to-one (src/components/staff/admin/).
+ */
+.admin-root {
+  --admin-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c8099' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  --color-ink: var(--color-dash-navy);
+  --color-muted: var(--color-dash-ink-2);
+  --color-line: var(--color-dash-line);
+  --color-canvas: var(--color-dash-subtle);
+  --color-surface: var(--color-white);
+  --color-brand-50: var(--color-dash-subtle);
+  --color-brand-200: var(--color-dash-line-strong);
+  --color-brand-700: var(--color-dash-navy-hover);
+  --color-brand-800: var(--color-dash-navy);
+  --color-brand-900: var(--color-dash-navy);
+  --color-accent-50: var(--color-dash-red-tint);
+  --color-accent-600: var(--color-dash-red);
+  --color-accent-700: var(--color-dash-red);
+  --radius-control: 999px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+}
+.admin-root .ui-button {
+  font-weight: 700;
+}
+/* Card headings (CardSection): the 18px / 800 section heading from the design. */
+.admin-root .ui-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.admin-root .ui-badge {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-weight: 700;
+}
+.admin-root .ui-badge-neutral {
+  background: var(--color-dash-subtle);
+  color: var(--color-dash-ink-2);
+}
+.admin-root .ui-badge-info {
+  background: var(--color-dash-navy-tint);
+  color: var(--color-dash-navy);
+}
+.admin-root .ui-badge-success {
+  background: var(--color-dash-green-tint);
+  color: var(--color-dash-green-ink);
+}
+.admin-root .ui-badge-warning {
+  background: var(--color-dash-draft-bg);
+  color: var(--color-dash-draft-ink);
+}
+.admin-root .ui-badge-danger {
+  background: var(--color-dash-red-tint);
+  color: var(--color-dash-red);
+}
+/* Fields: 42px pill input and select, 16px-radius textarea, 1.5px border. */
+.admin-root .field-control {
+  border: 1.5px solid var(--color-dash-line-strong);
+  font-size: 14px;
+  color: var(--color-dash-navy);
+}
+.admin-root :is(input, select).field-control {
+  height: 42px;
+  padding: 0 16px;
+}
+.admin-root textarea.field-control {
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+.admin-root select.field-control {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c8099' stroke-width='2.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+}
+.admin-root .field-control::placeholder {
+  color: var(--color-dash-ink-4);
+}
+.admin-root .field-control[aria-invalid="true"] {
+  border-color: var(--color-dash-red);
+}
+.admin-root :is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-dash-red);
+  outline-offset: 2px;
+}
+
+/*
+ * RISK ASSESSMENT TEST
+ * Layout and sizes are taken from the original risk test HTML file
+ * (card, progress bar, option boxes, result ring, round badge). Colors are mapped to the site's
+ * shared palette: the file's navy → brand-800, orange → accent-600.
+ * Used only in src/components/customer/risk-test.tsx; it does not spread to other screens.
+ */
+.ukvt-app {
+  max-width: 640px;
+  margin: 0 auto;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+.ukvt-app .ukvt-card {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 30px rgba(25, 33, 79, 0.06);
+}
+.ukvt-app .ukvt-head {
+  background: var(--color-brand-800);
+  color: #fff;
+  padding: 26px 26px 22px;
+}
+.ukvt-app .ukvt-head h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.ukvt-app .ukvt-head p {
+  font-size: 13.5px;
+  opacity: 0.85;
+  margin-top: 6px;
+}
+.ukvt-app .ukvt-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 99px;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.ukvt-app .ukvt-bar > i {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-600);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.ukvt-app .ukvt-body {
+  padding: 24px 26px;
+}
+.ukvt-app .ukvt-step {
+  animation: ukvtIn 0.25s ease;
+}
+@keyframes ukvtIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ukvt-app .ukvt-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ukvt-app .ukvt-opts legend {
+  padding: 0;
+  margin-bottom: 6px;
+}
+.ukvt-app .ukvt-qno {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent-600);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.ukvt-app .ukvt-q {
+  display: block;
+  font-size: 17px;
+  font-weight: 650;
+  margin: 6px 0 0;
+}
+.ukvt-app .ukvt-opt {
+  border: 1.5px solid var(--color-line);
+  border-radius: 12px;
+  padding: 13px 15px;
+  font-size: 14.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  background: #fff;
+  text-align: left;
+  width: 100%;
+}
+.ukvt-app .ukvt-opt:hover,
+.ukvt-app .ukvt-opt.sel {
+  border-color: var(--color-accent-600);
+  background: var(--color-accent-50);
+}
+/* Options are native radio buttons (for keyboard and screen readers); the focus ring is shown on the box itself. */
+.ukvt-app .ukvt-opt:has(input:focus-visible) {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+.ukvt-app .ukvt-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-line);
+  flex: 0 0 auto;
+  position: relative;
+  transition: 0.15s;
+}
+.ukvt-app .ukvt-opt.sel .ukvt-radio {
+  border-color: var(--color-accent-600);
+}
+.ukvt-app .ukvt-opt.sel .ukvt-radio::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--color-accent-600);
+}
+.ukvt-app .ukvt-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+}
+.ukvt-app .ukvt-btn {
+  display: inline-block;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 14.5px;
+  font-weight: 650;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+}
+.ukvt-app .ukvt-next {
+  background: var(--color-brand-800);
+  color: #fff;
+}
+.ukvt-app .ukvt-next:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ukvt-app .ukvt-back {
+  background: var(--color-brand-100);
+  color: var(--color-ink);
+}
+.ukvt-app .ukvt-result {
+  text-align: center;
+  padding: 6px 0;
+}
+.ukvt-app .ukvt-score-ring {
+  width: 150px;
+  height: 150px;
+  margin: 4px auto 14px;
+  position: relative;
+}
+.ukvt-app .ukvt-score-ring svg {
+  transform: rotate(-90deg);
+}
+.ukvt-app .ukvt-score-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ukvt-app .ukvt-dot {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.ukvt-app .ukvt-score-num span {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-top: 6px;
+}
+.ukvt-app .ukvt-badge {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.ukvt-app .ukvt-rtitle {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 2px 0 8px;
+}
+.ukvt-app .ukvt-rtext {
+  font-size: 14.5px;
+  color: var(--color-ink);
+  max-width: 460px;
+  margin: 0 auto 6px;
+}
+.ukvt-app .ukvt-closer {
+  text-align: left;
+  background: var(--color-brand-50);
+  border-left: 4px solid var(--color-brand-800);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+.ukvt-app .ukvt-closer p {
+  font-size: 13.5px;
+  color: var(--color-ink);
+  line-height: 1.55;
+  margin: 0;
+}
+.ukvt-app .ukvt-flags {
+  text-align: left;
+  margin: 18px 0;
+  border-top: 1px solid var(--color-line);
+  padding-top: 16px;
+}
+.ukvt-app .ukvt-flags h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-muted);
+  margin-bottom: 10px;
+}
+.ukvt-app .ukvt-flag {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  margin-bottom: 9px;
+  align-items: flex-start;
+}
+.ukvt-app .ukvt-flag .dot {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 11px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.ukvt-app .ukvt-plan {
+  text-align: left;
+  background: var(--color-accent-50);
+  border: 1.5px solid var(--color-accent-600);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 18px;
+}
+.ukvt-app .ukvt-plan h2 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-accent-700);
+  margin-bottom: 8px;
+}
+.ukvt-app .ukvt-plan p {
+  font-size: 13.5px;
+  color: var(--color-ink);
+  line-height: 1.55;
+}
+.ukvt-app .ukvt-plan.positive {
+  background: #eaf3ec;
+  border-color: #2e7d4f;
+}
+.ukvt-app .ukvt-plan.positive h2 {
+  color: #2e7d4f;
+}
+.ukvt-app .ukvt-next-step {
+  text-align: left;
+  background: var(--color-brand-50);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+}
+.ukvt-app .ukvt-next-step h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--color-brand-800);
+}
+.ukvt-app .ukvt-next-step p {
+  font-size: 13.5px;
+  color: var(--color-ink);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.ukvt-app .ukvt-save {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin-top: 16px;
+}
+.ukvt-app .ukvt-save-error p {
+  color: var(--color-accent-700);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.ukvt-app .ukvt-restart {
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 16px;
+  font-family: inherit;
+}
+.ukvt-app .ukvt-disc {
+  font-size: 11.5px;
+  color: var(--color-muted);
+  margin-top: 18px;
+  line-height: 1.5;
+}
+@media (max-width: 480px) {
+  .ukvt-app .ukvt-head {
+    padding: 20px 18px 18px;
+  }
+  .ukvt-app .ukvt-body {
+    padding: 20px 18px;
+  }
+  .ukvt-app .ukvt-head h1 {
+    font-size: 18px;
+  }
+  .ukvt-app .ukvt-q {
+    font-size: 16px;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

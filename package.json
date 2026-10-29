@@ -1,0 +1,51 @@
+{
+  "name": "vize-basvuru-portali",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --exclude tests/supabase/**",
+    "test:watch": "vitest --exclude tests/supabase/**",
+    "test:supabase": "vitest run tests/supabase",
+    "staff:create": "node scripts/create-staff.mjs",
+    "staff:mfa-reset": "node scripts/reset-staff-mfa.mjs",
+    "pdf:inspect": "node scripts/pdf-template-inspect.mjs",
+    "pdf:sample": "vitest run tests/pdf"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
+    "fflate": "^0.8.3",
+    "lucide-react": "^1.55.0",
+    "next": "16.4.2",
+    "nodemailer": "10.0.14",
+    "pdf-lib": "^1.17.1",
+    "radix-ui": "^1.8.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.9",
+    "@napi-rs/canvas": "^1.0.11",
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^24.19.2",
+    "@types/nodemailer": "8.0.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "country-flag-icons": "1.6.20",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "libphonenumber-js": "1.13.14",
+    "pdfjs-dist": "^6.4.299",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.4"
+  }
+}
